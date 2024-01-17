@@ -1,0 +1,10 @@
+.navbar {
+  height: 3rem;
+  width: 30%;
+  border: solid 2px whitesmoke;
+  margin: 10px;
+  border-radius: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: space-evenly;
+}
