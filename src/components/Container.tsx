@@ -4,9 +4,10 @@ import ReactDOM from "react-dom";
 const Tooltip: React.FC<{
   pos: { x: number; y: number };
   toolTipPos: string;
-}> = ({ pos, toolTipPos }) => {
+  containerRef: React.RefObject<HTMLDivElement>;
+}> = ({ pos, toolTipPos, containerRef }) => {
   let style: React.CSSProperties = {
-    position: "fixed",
+    position: "absolute",
     backgroundColor: "black",
     color: "orange",
     padding: "5px",
@@ -22,13 +23,13 @@ const Tooltip: React.FC<{
     case "top":
       style = {
         ...style,
-        top: `${pos.y + 45}px`,
-        left: `${pos.x + 440}px`,
+        top: `${pos.y - 40}px`,
+        left: `${pos.x + 20}px`,
       };
-      if (pos.y < 35) {
+      if (pos.y < 40) {
         style = {
           ...style,
-          top: `${pos.y + 190}px`,
+          top: `${pos.y + 110}px`,
         };
       }
       break;
@@ -36,13 +37,13 @@ const Tooltip: React.FC<{
     case "bottom":
       style = {
         ...style,
-        top: `${pos.y + 190}px`,
-        left: `${pos.x + 440}px`,
+        top: `${pos.y + 110}px`,
+        left: `${pos.x + 20}px`,
       };
       if (pos.y > 460) {
         style = {
           ...style,
-          top: `${pos.y + 45}px`,
+          top: `${pos.y - 40}px`,
         };
       }
       break;
@@ -50,13 +51,13 @@ const Tooltip: React.FC<{
     case "left":
       style = {
         ...style,
-        top: `${pos.y + 120}px`,
-        left: `${pos.x + 355}px`,
+        top: `${pos.y + 35}px`,
+        left: `${pos.x - 70}px`,
       };
-      if (pos.x < 65) {
+      if (pos.x < 70) {
         style = {
           ...style,
-          left: `${pos.x + 525}px`,
+          left: `${pos.x + 110}px`,
         };
       }
       break;
@@ -64,19 +65,24 @@ const Tooltip: React.FC<{
     case "right":
       style = {
         ...style,
-        top: `${pos.y + 120}px`,
-        left: `${pos.x + 525}px`,
+        top: `${pos.y + 35}px`,
+        left: `${pos.x + 110}px`,
       };
-      if (pos.x > 435) {
+      if (pos.x > 430) {
         style = {
           ...style,
-          left: `${pos.x + 355}px`,
+          left: `${pos.x - 70}px`,
         };
       }
       break;
   }
 
-  return ReactDOM.createPortal(<div style={style}>Hello!</div>, document.body);
+  return containerRef.current
+    ? ReactDOM.createPortal(
+        <div style={style}>Hello!</div>,
+        containerRef.current
+      )
+    : null;
 };
 
 const Container: React.FC<{ toolTipPos: string }> = ({ toolTipPos }) => {
@@ -84,6 +90,52 @@ const Container: React.FC<{ toolTipPos: string }> = ({ toolTipPos }) => {
   const [pos, setPos] = useState({ x: 0, y: 0 });
   const [rel, setRel] = useState<{ x: number; y: number } | null>(null);
   const [hovering, setHovering] = useState(false);
+  const containerRef = React.useRef<HTMLDivElement>(null);
+
+  const [containerPos, setContainerPos] = useState({ x: 0, y: 0 });
+  const [containerRel, setContainerRel] = useState<{
+    x: number;
+    y: number;
+  } | null>(null);
+  const [containerDragging, setContainerDragging] = useState(false);
+
+  const onContainerMouseDown = (e: MouseEvent<HTMLDivElement>) => {
+    if (e.button !== 0) return;
+    var posX = e.clientX - containerPos.x;
+    var posY = e.clientY - containerPos.y;
+    setContainerDragging(true);
+    setContainerRel({ x: posX, y: posY });
+    e.stopPropagation();
+    e.preventDefault();
+  };
+
+  const onContainerMouseMove = (e: globalThis.MouseEvent) => {
+    if (!containerDragging || !containerRel) return;
+    let newX = e.clientX - containerRel.x;
+    let newY = e.clientY - containerRel.y;
+    setContainerPos({
+      x: newX,
+      y: newY,
+    });
+    e.stopPropagation();
+    e.preventDefault();
+  };
+
+  const onContainerMouseUp = (e: globalThis.MouseEvent) => {
+    setContainerDragging(false);
+    e.stopPropagation();
+    e.preventDefault();
+  };
+
+  useEffect(() => {
+    document.addEventListener("mousemove", onContainerMouseMove);
+    document.addEventListener("mouseup", onContainerMouseUp);
+
+    return () => {
+      document.removeEventListener("mousemove", onContainerMouseMove);
+      document.removeEventListener("mouseup", onContainerMouseUp);
+    };
+  }, [containerDragging, onContainerMouseMove, onContainerMouseUp]);
 
   const onMouseEnter = () => {
     setHovering(true);
@@ -135,14 +187,30 @@ const Container: React.FC<{ toolTipPos: string }> = ({ toolTipPos }) => {
 
   return (
     <div
+      ref={containerRef}
       style={{
         height: "600px",
         width: "600px",
         border: "1px solid orangered",
-        position: "relative",
+        position: "absolute",
         borderRadius: "10px",
+        left: `${containerPos.x}px`,
+        top: `${containerPos.y}px`,
       }}
     >
+      <div
+        onMouseDown={onContainerMouseDown}
+        style={{
+          height: "25px",
+          width: "25px",
+          backgroundColor: "orange",
+          cursor: "move",
+          borderRadius: "5px",
+          left: "95%",
+          top: "1%",
+          position: "relative",
+        }}
+      ></div>
       <div
         onMouseDown={onMouseDown}
         onMouseEnter={onMouseEnter}
@@ -159,7 +227,13 @@ const Container: React.FC<{ toolTipPos: string }> = ({ toolTipPos }) => {
           cursor: "move",
         }}
       ></div>
-      {hovering && !dragging && <Tooltip pos={pos} toolTipPos={toolTipPos} />}
+      {hovering && !dragging && (
+        <Tooltip
+          pos={pos}
+          toolTipPos={toolTipPos}
+          containerRef={containerRef}
+        />
+      )}
     </div>
   );
 };
