@@ -3,15 +3,19 @@ import ReactDOM from "react-dom";
 
 const Tooltip: React.FC<{
   pos: { x: number; y: number };
-  toolTipPos: "top" | "bottom" | "left" | "right";
+  toolTipPos: string;
 }> = ({ pos, toolTipPos }) => {
-  let style = {
+  let style: React.CSSProperties = {
     position: "fixed",
-    backgroundColor: "lightgray",
+    backgroundColor: "black",
+    color: "orange",
     padding: "5px",
     borderRadius: "5px",
     width: "50px",
     height: "20px",
+    display: "flex",
+    alignItems: "center",
+    justifyContent: "space-evenly",
   };
 
   switch (toolTipPos) {
@@ -28,6 +32,7 @@ const Tooltip: React.FC<{
         };
       }
       break;
+
     case "bottom":
       style = {
         ...style,
@@ -41,32 +46,43 @@ const Tooltip: React.FC<{
         };
       }
       break;
+
     case "left":
       style = {
         ...style,
-        top: `${pos.y + 45}px`,
-        left: `${pos.x}px`,
+        top: `${pos.y + 120}px`,
+        left: `${pos.x + 355}px`,
       };
-
+      if (pos.x < 65) {
+        style = {
+          ...style,
+          left: `${pos.x + 525}px`,
+        };
+      }
       break;
+
     case "right":
       style = {
         ...style,
-        top: `${pos.y + 45}px`,
-        right: `${pos.x}px`,
+        top: `${pos.y + 120}px`,
+        left: `${pos.x + 525}px`,
       };
-
+      if (pos.x > 435) {
+        style = {
+          ...style,
+          left: `${pos.x + 355}px`,
+        };
+      }
       break;
   }
 
-  return ReactDOM.createPortal(<div style={style}>Tooltip</div>, document.body);
+  return ReactDOM.createPortal(<div style={style}>Hello!</div>, document.body);
 };
 
-const Container: React.FC = () => {
+const Container: React.FC<{ toolTipPos: string }> = ({ toolTipPos }) => {
   const [dragging, setDragging] = useState(false);
   const [pos, setPos] = useState({ x: 0, y: 0 });
   const [rel, setRel] = useState<{ x: number; y: number } | null>(null);
-  const [toolTipPos, setToolTipPos] = useState("top");
   const [hovering, setHovering] = useState(false);
 
   const onMouseEnter = (e: MouseEvent<HTMLDivElement>) => {
@@ -122,7 +138,7 @@ const Container: React.FC = () => {
       style={{
         height: "600px",
         width: "600px",
-        border: "2px solid blanchedalmond",
+        border: "1px solid orangered",
         position: "relative",
         borderRadius: "10px",
       }}
@@ -134,16 +150,15 @@ const Container: React.FC = () => {
         style={{
           height: "100px",
           width: "100px",
-          backgroundColor: "blanchedalmond",
+          backgroundColor: "orangered",
+
           borderRadius: "5px",
           position: "absolute",
           left: `${pos.x}px`,
           top: `${pos.y}px`,
           cursor: "move",
         }}
-      >
-        item
-      </div>
+      ></div>
       {hovering && !dragging && <Tooltip pos={pos} toolTipPos={toolTipPos} />}
     </div>
   );
