@@ -1,5 +1,6 @@
 import React, { useState, useEffect, MouseEvent } from "react";
 import ReactDOM from "react-dom";
+import { MdDragIndicator } from "react-icons/md";
 
 const Tooltip: React.FC<{
   pos: { x: number; y: number };
@@ -203,14 +204,19 @@ const Container: React.FC<{ toolTipPos: string }> = ({ toolTipPos }) => {
         style={{
           height: "25px",
           width: "25px",
-          backgroundColor: "orange",
+          border: "solid 1px orangered",
           cursor: "move",
           borderRadius: "5px",
           left: "95%",
-          top: "1%",
+          top: "0.5%",
           position: "relative",
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "space-evenly",
         }}
-      ></div>
+      >
+        <MdDragIndicator style={{ scale: "1.5", color: "orange" }} />
+      </div>
       <div
         onMouseDown={onMouseDown}
         onMouseEnter={onMouseEnter}
