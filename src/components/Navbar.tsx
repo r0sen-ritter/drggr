@@ -13,7 +13,17 @@ const Navbar = ({ setMenuPosition }: NavbarProps) => {
   return (
     <div className="navbar">
       <h4 style={{ color: "orange" }}>ToolTip Position:</h4>
-      <select name="position" id="position" onChange={handleChange}>
+      <select
+        name="position"
+        id="position"
+        onChange={handleChange}
+        style={{
+          border: "solid 1px orangered",
+          borderRadius: "3px",
+          background: "black",
+          color: "orange",
+        }}
+      >
         <option value="top">Top</option>
         <option value="bottom">Bottom</option>
         <option value="left">Left</option>

@@ -1,10 +1,10 @@
 .navbar {
   height: 3rem;
   width: 30%;
-  border: solid 1px orangered;
   margin: 10px;
   border-radius: 7px;
   display: flex;
   align-items: center;
   justify-content: space-evenly;
+  background-color: black;
 }
