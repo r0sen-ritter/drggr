@@ -88,12 +88,12 @@ const Tooltip: React.FC<{
 
 const Container: React.FC<{ toolTipPos: string }> = ({ toolTipPos }) => {
   const [dragging, setDragging] = useState(false);
-  const [pos, setPos] = useState({ x: 0, y: 0 });
+  const [pos, setPos] = useState({ x: 250, y: 250 });
   const [rel, setRel] = useState<{ x: number; y: number } | null>(null);
   const [hovering, setHovering] = useState(false);
   const containerRef = React.useRef<HTMLDivElement>(null);
 
-  const [containerPos, setContainerPos] = useState({ x: 0, y: 0 });
+  const [containerPos, setContainerPos] = useState({ x: 420, y: 80 });
   const [containerRel, setContainerRel] = useState<{
     x: number;
     y: number;
