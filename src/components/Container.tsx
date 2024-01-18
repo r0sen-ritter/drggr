@@ -85,11 +85,11 @@ const Container: React.FC<{ toolTipPos: string }> = ({ toolTipPos }) => {
   const [rel, setRel] = useState<{ x: number; y: number } | null>(null);
   const [hovering, setHovering] = useState(false);
 
-  const onMouseEnter = (e: MouseEvent<HTMLDivElement>) => {
+  const onMouseEnter = () => {
     setHovering(true);
   };
 
-  const onMouseLeave = (e: MouseEvent<HTMLDivElement>) => {
+  const onMouseLeave = () => {
     setHovering(false);
   };
 
