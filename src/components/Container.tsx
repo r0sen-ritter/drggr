@@ -1,11 +1,12 @@
 import React, { useState, useEffect, MouseEvent } from "react";
 import ReactDOM from "react-dom";
 
-const Tooltip: React.FC<{ pos: { x: number; y: number } }> = ({ pos }) => {
+const Tooltip: React.FC<{
+  pos: { x: number; y: number };
+  toolTipPos: "top" | "bottom" | "left" | "right";
+}> = ({ pos, toolTipPos }) => {
   let style = {
     position: "fixed",
-    top: `${pos.y + 45}px`,
-    left: `${pos.x + 440}px`,
     backgroundColor: "lightgray",
     padding: "5px",
     borderRadius: "5px",
@@ -13,16 +14,49 @@ const Tooltip: React.FC<{ pos: { x: number; y: number } }> = ({ pos }) => {
     height: "20px",
   };
 
-  if (pos.y < 35) {
-    style = {
-      ...style,
-      top: `${pos.y + 190}px`,
-    };
-  } else if (pos.y + 440 + 20 > 600) {
-    style = {
-      ...style,
-      top: `${pos.y + 190}px`,
-    };
+  switch (toolTipPos) {
+    case "top":
+      style = {
+        ...style,
+        top: `${pos.y + 45}px`,
+        left: `${pos.x + 440}px`,
+      };
+      if (pos.y < 35) {
+        style = {
+          ...style,
+          top: `${pos.y + 190}px`,
+        };
+      }
+      break;
+    case "bottom":
+      style = {
+        ...style,
+        top: `${pos.y + 190}px`,
+        left: `${pos.x + 440}px`,
+      };
+      if (pos.y > 460) {
+        style = {
+          ...style,
+          top: `${pos.y + 45}px`,
+        };
+      }
+      break;
+    case "left":
+      style = {
+        ...style,
+        top: `${pos.y + 45}px`,
+        left: `${pos.x}px`,
+      };
+
+      break;
+    case "right":
+      style = {
+        ...style,
+        top: `${pos.y + 45}px`,
+        right: `${pos.x}px`,
+      };
+
+      break;
   }
 
   return ReactDOM.createPortal(<div style={style}>Tooltip</div>, document.body);
@@ -110,7 +144,7 @@ const Container: React.FC = () => {
       >
         item
       </div>
-      {hovering && !dragging && <Tooltip pos={pos} />}
+      {hovering && !dragging && <Tooltip pos={pos} toolTipPos={toolTipPos} />}
     </div>
   );
 };
