@@ -100,6 +100,75 @@ const Container: React.FC<{ toolTipPos: string }> = ({ toolTipPos }) => {
   } | null>(null);
   const [containerDragging, setContainerDragging] = useState(false);
 
+  const [resizing, setResizing] = useState(false);
+  const [resizeHandle, setResizeHandle] = useState("");
+  const [initialMousePos, setInitialMousePos] = useState({ x: 0, y: 0 });
+
+  const [containerWidth, setContainerWidth] = useState(600);
+  const [containerHeight, setContainerHeight] = useState(600);
+
+  const onResizeMouseDown = (handle: string, e: MouseEvent<HTMLDivElement>) => {
+    if (e.button !== 0) return;
+    setResizing(true);
+    setResizeHandle(handle);
+    setInitialMousePos({ x: e.clientX, y: e.clientY });
+    setContainerWidth(containerRef.current?.offsetWidth || 0);
+    setContainerHeight(containerRef.current?.offsetHeight || 0);
+    e.stopPropagation();
+    e.preventDefault();
+  };
+  const onResizeMouseMove = (e: globalThis.MouseEvent) => {
+    if (!resizing) return;
+    let dx = e.clientX - initialMousePos.x;
+    let dy = e.clientY - initialMousePos.y;
+    let newWidth = containerWidth;
+    let newHeight = containerHeight;
+
+    if (resizeHandle.includes("left")) {
+      newWidth -= dx;
+      containerRef.current?.style.setProperty(
+        "left",
+        `${containerPos.x + dx}px`
+      );
+    }
+    if (resizeHandle.includes("right")) newWidth += dx;
+    if (resizeHandle.includes("top")) {
+      newHeight -= dy;
+      containerRef.current?.style.setProperty(
+        "top",
+        `${containerPos.y + dy}px`
+      );
+    }
+    if (resizeHandle.includes("bottom")) newHeight += dy;
+
+    containerRef.current?.style.setProperty("width", `${newWidth}px`);
+    containerRef.current?.style.setProperty("height", `${newHeight}px`);
+
+    e.stopPropagation();
+    e.preventDefault();
+  };
+
+  const onResizeMouseUp = (e: globalThis.MouseEvent) => {
+    setResizing(false);
+    e.stopPropagation();
+    e.preventDefault();
+
+    if (containerRef.current) {
+      setContainerWidth(containerRef.current.offsetWidth);
+      setContainerHeight(containerRef.current.offsetHeight);
+    }
+  };
+
+  useEffect(() => {
+    document.addEventListener("mousemove", onResizeMouseMove);
+    document.addEventListener("mouseup", onResizeMouseUp);
+
+    return () => {
+      document.removeEventListener("mousemove", onResizeMouseMove);
+      document.removeEventListener("mouseup", onResizeMouseUp);
+    };
+  }, [resizing, onResizeMouseMove, onResizeMouseUp]);
+
   const onContainerMouseDown = (e: MouseEvent<HTMLDivElement>) => {
     if (e.button !== 0) return;
     var posX = e.clientX - containerPos.x;
@@ -160,8 +229,8 @@ const Container: React.FC<{ toolTipPos: string }> = ({ toolTipPos }) => {
     if (!dragging || !rel) return;
     let newX = e.clientX - rel.x;
     let newY = e.clientY - rel.y;
-    newX = Math.max(0, Math.min(600 - 100, newX));
-    newY = Math.max(0, Math.min(600 - 100, newY));
+    newX = Math.max(0, Math.min(containerWidth - 100, newX));
+    newY = Math.max(0, Math.min(containerHeight - 100, newY));
     setPos({
       x: newX,
       y: newY,
@@ -175,6 +244,21 @@ const Container: React.FC<{ toolTipPos: string }> = ({ toolTipPos }) => {
     e.stopPropagation();
     e.preventDefault();
   };
+
+  useEffect(() => {
+    const handleResize = () => {
+      if (containerRef.current) {
+        setContainerWidth(containerRef.current.offsetWidth);
+        setContainerHeight(containerRef.current.offsetHeight);
+      }
+    };
+
+    containerRef.current?.addEventListener("resize", handleResize);
+
+    return () => {
+      containerRef.current?.removeEventListener("resize", handleResize);
+    };
+  }, []);
 
   useEffect(() => {
     document.addEventListener("mousemove", onMouseMove);
@@ -197,6 +281,8 @@ const Container: React.FC<{ toolTipPos: string }> = ({ toolTipPos }) => {
         borderRadius: "10px",
         left: `${containerPos.x}px`,
         top: `${containerPos.y}px`,
+        resize: "both",
+        overflow: "auto",
       }}
     >
       <div
@@ -207,9 +293,9 @@ const Container: React.FC<{ toolTipPos: string }> = ({ toolTipPos }) => {
           border: "solid 1px orangered",
           cursor: "move",
           borderRadius: "5px",
-          left: "95%",
-          top: "0.5%",
-          position: "relative",
+          left: "90%",
+          top: "10%",
+          position: "absolute",
           display: "flex",
           alignItems: "center",
           justifyContent: "space-evenly",
@@ -225,7 +311,6 @@ const Container: React.FC<{ toolTipPos: string }> = ({ toolTipPos }) => {
           height: "100px",
           width: "100px",
           backgroundColor: "orangered",
-
           borderRadius: "5px",
           position: "absolute",
           left: `${pos.x}px`,
@@ -240,6 +325,94 @@ const Container: React.FC<{ toolTipPos: string }> = ({ toolTipPos }) => {
           containerRef={containerRef}
         />
       )}
+
+      <div
+        onMouseDown={(e) => onResizeMouseDown("top-left", e)}
+        style={{
+          position: "absolute",
+          top: 0,
+          left: 0,
+          width: "10px",
+          height: "10px",
+          cursor: "nwse-resize",
+        }}
+      />
+      <div
+        onMouseDown={(e) => onResizeMouseDown("top", e)}
+        style={{
+          position: "absolute",
+          top: 0,
+          left: "5%",
+          width: "90%",
+          height: "10px",
+          cursor: "ns-resize",
+        }}
+      />
+      <div
+        onMouseDown={(e) => onResizeMouseDown("top-right", e)}
+        style={{
+          position: "absolute",
+          top: 0,
+          right: 0,
+          width: "10px",
+          height: "10px",
+          cursor: "nesw-resize",
+        }}
+      />
+      <div
+        onMouseDown={(e) => onResizeMouseDown("right", e)}
+        style={{
+          position: "absolute",
+
+          right: 0,
+          width: "10px",
+          height: "90%",
+          cursor: "ew-resize",
+        }}
+      />
+      <div
+        onMouseDown={(e) => onResizeMouseDown("bottom-right", e)}
+        style={{
+          position: "absolute",
+          bottom: 0,
+          right: 0,
+          width: "10px",
+          height: "10px",
+          cursor: "nwse-resize",
+        }}
+      />
+      <div
+        onMouseDown={(e) => onResizeMouseDown("bottom", e)}
+        style={{
+          position: "absolute",
+          bottom: 0,
+          left: "5%",
+          width: "90%",
+          height: "10px",
+          cursor: "ns-resize",
+        }}
+      />
+      <div
+        onMouseDown={(e) => onResizeMouseDown("bottom-left", e)}
+        style={{
+          position: "absolute",
+          bottom: 0,
+          left: 0,
+          width: "10px",
+          height: "10px",
+          cursor: "nesw-resize",
+        }}
+      />
+      <div
+        onMouseDown={(e) => onResizeMouseDown("left", e)}
+        style={{
+          position: "absolute",
+          left: 0,
+          width: "10px",
+          height: "90%",
+          cursor: "ew-resize",
+        }}
+      />
     </div>
   );
 };
