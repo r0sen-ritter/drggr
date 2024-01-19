@@ -4,3 +4,80 @@
   border: solid 2px whitesmoke;
   margin: 10px;
 }
+.top-left {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 10px;
+  height: 10px;
+  cursor: nwse-resize;
+}
+.top {
+  position: absolute;
+  top: 0;
+  left: 5%;
+  width: 90%;
+  height: 10px;
+  cursor: ns-resize;
+}
+.top-right {
+  position: absolute;
+  top: 0;
+  right: 0;
+  width: 10px;
+  height: 10px;
+  cursor: nesw-resize;
+}
+.right {
+  position: absolute;
+  top: 5%;
+  right: 0;
+  width: 10px;
+  height: 90%;
+  cursor: ew-resize;
+}
+.bottom-right {
+  position: absolute;
+  bottom: 0;
+  right: 0;
+  width: 10px;
+  height: 10px;
+  cursor: nwse-resize;
+}
+.bottom {
+  position: absolute;
+  bottom: 0;
+  left: 5%;
+  width: 90%;
+  height: 10px;
+  cursor: ns-resize;
+}
+.bottom-left {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  width: 10px;
+  height: 10px;
+  cursor: nesw-resize;
+}
+.left {
+  position: absolute;
+  top: 5%;
+  left: 0;
+  width: 10px;
+  height: 90%;
+  cursor: ew-resize;
+}
+.drag-handle {
+  height: 25px;
+  width: 25px;
+  border: solid 1px orangered;
+  cursor: move;
+  border-radius: 5px;
+  left: 90%;
+  top: 10%;
+  position: absolute;
+  display: flex;
+  align-items: center;
+  justify-content: space-evenly;
+}
