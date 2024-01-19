@@ -43,23 +43,22 @@ const Container: React.FC<{ toolTipPos: string }> = ({ toolTipPos }) => {
 
     if (resizeHandle.includes("left")) {
       newWidth -= dx;
-      containerRef.current?.style.setProperty(
-        "left",
-        `${containerPos.x + dx}px`
-      );
     }
     if (resizeHandle.includes("right")) newWidth += dx;
     if (resizeHandle.includes("top")) {
       newHeight -= dy;
-      containerRef.current?.style.setProperty(
-        "top",
-        `${containerPos.y + dy}px`
-      );
     }
     if (resizeHandle.includes("bottom")) newHeight += dy;
 
     containerRef.current?.style.setProperty("width", `${newWidth}px`);
     containerRef.current?.style.setProperty("height", `${newHeight}px`);
+
+    if (pos.x > newWidth - 100) {
+      setPos({ ...pos, x: newWidth - 100 });
+    }
+    if (pos.y > newHeight - 100) {
+      setPos({ ...pos, y: newHeight - 100 });
+    }
 
     e.stopPropagation();
     e.preventDefault();
