@@ -40,7 +40,7 @@ const Tooltip: React.FC<{
         top: `${pos.y + 110}px`,
         left: `${pos.x + 20}px`,
       };
-      if (pos.y > 460) {
+      if (pos.y > containerRef.current?.offsetHeight! - 145) {
         style = {
           ...style,
           top: `${pos.y - 40}px`,
@@ -68,7 +68,7 @@ const Tooltip: React.FC<{
         top: `${pos.y + 35}px`,
         left: `${pos.x + 110}px`,
       };
-      if (pos.x > 430) {
+      if (pos.x > containerRef.current?.offsetWidth! - 175) {
         style = {
           ...style,
           left: `${pos.x - 70}px`,

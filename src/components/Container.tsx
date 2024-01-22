@@ -38,6 +38,7 @@ const Container: React.FC<{ toolTipPos: string }> = ({ toolTipPos }) => {
     e.stopPropagation();
     e.preventDefault();
   };
+
   const onResizeMouseMove = (e: globalThis.MouseEvent) => {
     if (!resizing) return;
     let dx = e.clientX - initialMousePos.x;
@@ -56,7 +57,6 @@ const Container: React.FC<{ toolTipPos: string }> = ({ toolTipPos }) => {
         `${containerPos.x + dx}px`
       );
     }
-    if (resizeHandle.includes("right")) newWidth += dx;
 
     if (resizeHandle.includes("right")) {
       newWidth += dx;
@@ -139,24 +139,23 @@ const Container: React.FC<{ toolTipPos: string }> = ({ toolTipPos }) => {
     });
     e.stopPropagation();
     e.preventDefault();
+    document.addEventListener("mouseup", onContainerMouseUp);
   };
 
   const onContainerMouseUp = (e: globalThis.MouseEvent) => {
     setContainerDragging(false);
     e.stopPropagation();
     e.preventDefault();
+    document.removeEventListener("mouseup", onContainerMouseUp);
   };
 
   useEffect(() => {
     document.addEventListener("mousemove", onContainerMouseMove);
-    document.addEventListener("mouseup", onContainerMouseUp);
 
     return () => {
       document.removeEventListener("mousemove", onContainerMouseMove);
-      document.removeEventListener("mouseup", onContainerMouseUp);
     };
-  }, [containerDragging, onContainerMouseMove, onContainerMouseUp]);
-
+  }, [containerDragging, onContainerMouseMove]);
   const onMouseEnter = () => {
     setHovering(true);
   };
@@ -173,6 +172,7 @@ const Container: React.FC<{ toolTipPos: string }> = ({ toolTipPos }) => {
     setRel({ x: posX, y: posY });
     e.stopPropagation();
     e.preventDefault();
+    document.addEventListener("mouseup", onMouseUp);
   };
 
   const onMouseMove = (e: globalThis.MouseEvent) => {
@@ -193,6 +193,7 @@ const Container: React.FC<{ toolTipPos: string }> = ({ toolTipPos }) => {
     setDragging(false);
     e.stopPropagation();
     e.preventDefault();
+    document.removeEventListener("mouseup", onMouseUp);
   };
 
   useEffect(() => {
@@ -212,13 +213,11 @@ const Container: React.FC<{ toolTipPos: string }> = ({ toolTipPos }) => {
 
   useEffect(() => {
     document.addEventListener("mousemove", onMouseMove);
-    document.addEventListener("mouseup", onMouseUp);
 
     return () => {
       document.removeEventListener("mousemove", onMouseMove);
-      document.removeEventListener("mouseup", onMouseUp);
     };
-  }, [dragging, onMouseMove, onMouseUp]);
+  }, [dragging, onMouseMove]);
 
   return (
     <div
