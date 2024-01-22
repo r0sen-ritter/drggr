@@ -9,18 +9,15 @@ const Container: React.FC<{ toolTipPos: string }> = ({ toolTipPos }) => {
   const [rel, setRel] = useState<{ x: number; y: number } | null>(null);
   const [hovering, setHovering] = useState(false);
   const containerRef = React.useRef<HTMLDivElement>(null);
-
   const [containerPos, setContainerPos] = useState({ x: 420, y: 80 });
   const [containerRel, setContainerRel] = useState<{
     x: number;
     y: number;
   } | null>(null);
   const [containerDragging, setContainerDragging] = useState(false);
-
   const [resizing, setResizing] = useState(false);
   const [resizeHandle, setResizeHandle] = useState("");
   const [initialMousePos, setInitialMousePos] = useState({ x: 0, y: 0 });
-
   const [containerWidth, setContainerWidth] = useState(600);
   const [containerHeight, setContainerHeight] = useState(600);
 
@@ -83,17 +80,14 @@ const Container: React.FC<{ toolTipPos: string }> = ({ toolTipPos }) => {
         dy = containerHeight - newHeight;
       }
     }
-
     containerRef.current?.style.setProperty("width", `${newWidth}px`);
     containerRef.current?.style.setProperty("height", `${newHeight}px`);
-
     if (pos.x > newWidth - 100) {
       setPos({ ...pos, x: newWidth - 100 });
     }
     if (pos.y > newHeight - 100) {
       setPos({ ...pos, y: newHeight - 100 });
     }
-
     e.stopPropagation();
     e.preventDefault();
   };
@@ -119,12 +113,28 @@ const Container: React.FC<{ toolTipPos: string }> = ({ toolTipPos }) => {
     };
   }, [resizing, onResizeMouseMove, onResizeMouseUp]);
 
+  useEffect(() => {
+    const handleResize = () => {
+      if (containerRef.current) {
+        setContainerWidth(containerRef.current.offsetWidth);
+        setContainerHeight(containerRef.current.offsetHeight);
+      }
+    };
+    containerRef.current?.addEventListener("resize", handleResize);
+
+    return () => {
+      containerRef.current?.removeEventListener("resize", handleResize);
+    };
+  }, []);
+
   const onContainerMouseDown = (e: MouseEvent<HTMLDivElement>) => {
     if (e.button !== 0) return;
-    var posX = e.clientX - containerPos.x;
-    var posY = e.clientY - containerPos.y;
-    setContainerDragging(true);
-    setContainerRel({ x: posX, y: posY });
+    if (containerRef.current) {
+      var posX = e.clientX - containerRef.current.offsetLeft;
+      var posY = e.clientY - containerRef.current.offsetTop;
+      setContainerDragging(true);
+      setContainerRel({ x: posX, y: posY });
+    }
     e.stopPropagation();
     e.preventDefault();
   };
@@ -156,10 +166,10 @@ const Container: React.FC<{ toolTipPos: string }> = ({ toolTipPos }) => {
       document.removeEventListener("mousemove", onContainerMouseMove);
     };
   }, [containerDragging, onContainerMouseMove]);
+
   const onMouseEnter = () => {
     setHovering(true);
   };
-
   const onMouseLeave = () => {
     setHovering(false);
   };
@@ -197,21 +207,6 @@ const Container: React.FC<{ toolTipPos: string }> = ({ toolTipPos }) => {
   };
 
   useEffect(() => {
-    const handleResize = () => {
-      if (containerRef.current) {
-        setContainerWidth(containerRef.current.offsetWidth);
-        setContainerHeight(containerRef.current.offsetHeight);
-      }
-    };
-
-    containerRef.current?.addEventListener("resize", handleResize);
-
-    return () => {
-      containerRef.current?.removeEventListener("resize", handleResize);
-    };
-  }, []);
-
-  useEffect(() => {
     document.addEventListener("mousemove", onMouseMove);
 
     return () => {
@@ -222,16 +217,10 @@ const Container: React.FC<{ toolTipPos: string }> = ({ toolTipPos }) => {
   return (
     <div
       ref={containerRef}
+      className="container"
       style={{
-        height: "600px",
-        width: "600px",
-        border: "1px solid orangered",
-        position: "absolute",
-        borderRadius: "10px",
         left: `${containerPos.x}px`,
         top: `${containerPos.y}px`,
-        resize: "both",
-        overflow: "auto",
       }}
     >
       <div onMouseDown={onContainerMouseDown} className="drag-handle">
@@ -241,15 +230,10 @@ const Container: React.FC<{ toolTipPos: string }> = ({ toolTipPos }) => {
         onMouseDown={onMouseDown}
         onMouseEnter={onMouseEnter}
         onMouseLeave={onMouseLeave}
+        className="item"
         style={{
-          height: "100px",
-          width: "100px",
-          backgroundColor: "orangered",
-          borderRadius: "5px",
-          position: "absolute",
           left: `${pos.x}px`,
           top: `${pos.y}px`,
-          cursor: "move",
         }}
       ></div>
       {hovering && !dragging && (
