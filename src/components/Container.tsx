@@ -31,6 +31,10 @@ const Container: React.FC<{ toolTipPos: string }> = ({ toolTipPos }) => {
     setInitialMousePos({ x: e.clientX, y: e.clientY });
     setContainerWidth(containerRef.current?.offsetWidth || 0);
     setContainerHeight(containerRef.current?.offsetHeight || 0);
+    setContainerPos({
+      x: containerRef.current?.offsetLeft || 0,
+      y: containerRef.current?.offsetTop || 0,
+    });
     e.stopPropagation();
     e.preventDefault();
   };
@@ -43,27 +47,42 @@ const Container: React.FC<{ toolTipPos: string }> = ({ toolTipPos }) => {
 
     if (resizeHandle.includes("left")) {
       newWidth -= dx;
+      if (newWidth < 100) {
+        newWidth = 100;
+        dx = containerWidth - newWidth;
+      }
       containerRef.current?.style.setProperty(
         "left",
         `${containerPos.x + dx}px`
       );
-      if (pos.x < dx) {
-        setPos({ ...pos, x: 0 });
-      } else {
-        setPos({ ...pos, x: pos.x - dx });
-      }
     }
     if (resizeHandle.includes("right")) newWidth += dx;
-    if (resizeHandle.includes("top")) {
-      newHeight -= dy;
 
-      if (pos.y < dy) {
-        setPos({ ...pos, y: 0 });
-      } else {
-        setPos({ ...pos, y: pos.y - dy });
+    if (resizeHandle.includes("right")) {
+      newWidth += dx;
+      if (newWidth < 100) {
+        newWidth = 100;
+        dx = containerWidth - newWidth;
       }
     }
-    if (resizeHandle.includes("bottom")) newHeight += dy;
+    if (resizeHandle.includes("top")) {
+      newHeight -= dy;
+      if (newHeight < 100) {
+        newHeight = 100;
+        dy = containerHeight - newHeight;
+      }
+      containerRef.current?.style.setProperty(
+        "top",
+        `${containerPos.y + dy}px`
+      );
+    }
+    if (resizeHandle.includes("bottom")) {
+      newHeight += dy;
+      if (newHeight < 100) {
+        newHeight = 100;
+        dy = containerHeight - newHeight;
+      }
+    }
 
     containerRef.current?.style.setProperty("width", `${newWidth}px`);
     containerRef.current?.style.setProperty("height", `${newHeight}px`);
