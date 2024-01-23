@@ -18,8 +18,7 @@ const Navbar = ({ setMenuPosition }: NavbarProps) => {
         id="position"
         onChange={handleChange}
         style={{
-          border: "solid 1px orangered",
-          borderRadius: "3px",
+          border: "solid 1px black",
           background: "black",
           color: "orange",
         }}
