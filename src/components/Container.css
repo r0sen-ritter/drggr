@@ -4,7 +4,6 @@
   border: 1px solid orangered;
   position: absolute;
   border-radius: 10px;
-  resize: both;
   overflow: auto;
 }
 .top-left {
