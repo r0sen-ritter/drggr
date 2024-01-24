@@ -1,19 +1,24 @@
-import React, { useState, useEffect, MouseEvent } from "react";
+import React, { useState, useEffect, MouseEvent, useRef } from "react";
 import Tooltip from "./Tooltip";
 import { MdDragIndicator } from "react-icons/md";
 import "./Container.css";
 
 const Container: React.FC<{ toolTipPos: string }> = ({ toolTipPos }) => {
   const [dragging, setDragging] = useState(false);
+  const [hovering, setHovering] = useState(false);
+
   const [pos, setPos] = useState({ x: 250, y: 250 });
   const [rel, setRel] = useState<{ x: number; y: number } | null>(null);
-  const [hovering, setHovering] = useState(false);
-  const containerRef = React.useRef<HTMLDivElement>(null);
+
   const [containerPos, setContainerPos] = useState({ x: 420, y: 80 });
   const [containerRel, setContainerRel] = useState<{
     x: number;
     y: number;
   } | null>(null);
+
+  const containerRef = useRef<HTMLDivElement>(null);
+  const innerRectangleRef = useRef<HTMLDivElement>(null);
+
   const [containerDragging, setContainerDragging] = useState(false);
   const [resizing, setResizing] = useState(false);
   const [resizeHandle, setResizeHandle] = useState("");
@@ -34,7 +39,14 @@ const Container: React.FC<{ toolTipPos: string }> = ({ toolTipPos }) => {
     });
     e.stopPropagation();
     e.preventDefault();
+    setPos({
+      x: innerRectangleRef.current?.offsetLeft || 0,
+      y: innerRectangleRef.current?.offsetTop || 0,
+    });
   };
+
+  let totalShiftX = 0;
+  let totalShiftY = 0;
 
   const onResizeMouseMove = (e: globalThis.MouseEvent) => {
     if (!resizing) return;
@@ -53,6 +65,15 @@ const Container: React.FC<{ toolTipPos: string }> = ({ toolTipPos }) => {
         "left",
         `${containerPos.x + dx}px`
       );
+      containerRef.current?.style.setProperty("width", `${newWidth}px`);
+
+      let newPos = pos.x - dx - totalShiftX;
+      if (newPos < 0) {
+        totalShiftX += newPos;
+        newPos = 0;
+      }
+
+      innerRectangleRef.current?.style.setProperty("left", `${newPos}px`);
     }
 
     if (resizeHandle.includes("right")) {
@@ -60,6 +81,17 @@ const Container: React.FC<{ toolTipPos: string }> = ({ toolTipPos }) => {
       if (newWidth < 100) {
         newWidth = 100;
         dx = containerWidth - newWidth;
+      }
+      containerRef.current?.style.setProperty("width", `${newWidth}px`);
+
+      const innerItemPos = innerRectangleRef.current?.offsetLeft || 0;
+      const innerItemWidth = innerRectangleRef.current?.offsetWidth || 0;
+
+      if (newWidth < innerItemPos + innerItemWidth) {
+        innerRectangleRef.current?.style.setProperty(
+          "left",
+          `${newWidth - innerItemWidth}px`
+        );
       }
     }
     if (resizeHandle.includes("top")) {
@@ -72,6 +104,15 @@ const Container: React.FC<{ toolTipPos: string }> = ({ toolTipPos }) => {
         "top",
         `${containerPos.y + dy}px`
       );
+      containerRef.current?.style.setProperty("height", `${newHeight}px`);
+
+      let newPos = pos.y - dy - totalShiftY;
+      if (newPos < 0) {
+        totalShiftY += newPos;
+        newPos = 0;
+      }
+
+      innerRectangleRef.current?.style.setProperty("top", `${newPos}px`);
     }
     if (resizeHandle.includes("bottom")) {
       newHeight += dy;
@@ -79,15 +120,21 @@ const Container: React.FC<{ toolTipPos: string }> = ({ toolTipPos }) => {
         newHeight = 100;
         dy = containerHeight - newHeight;
       }
+      containerRef.current?.style.setProperty("height", `${newHeight}px`);
+
+      const innerItemPos = innerRectangleRef.current?.offsetTop || 0;
+      const innerItemHeight = innerRectangleRef.current?.offsetHeight || 0;
+
+      if (newHeight < innerItemPos + innerItemHeight) {
+        innerRectangleRef.current?.style.setProperty(
+          "top",
+          `${newHeight - innerItemHeight}px`
+        );
+      }
     }
     containerRef.current?.style.setProperty("width", `${newWidth}px`);
     containerRef.current?.style.setProperty("height", `${newHeight}px`);
-    if (pos.x > newWidth - 100) {
-      setPos({ ...pos, x: newWidth - 100 });
-    }
-    if (pos.y > newHeight - 100) {
-      setPos({ ...pos, y: newHeight - 100 });
-    }
+
     e.stopPropagation();
     e.preventDefault();
   };
@@ -101,6 +148,11 @@ const Container: React.FC<{ toolTipPos: string }> = ({ toolTipPos }) => {
       setContainerWidth(containerRef.current.offsetWidth);
       setContainerHeight(containerRef.current.offsetHeight);
     }
+
+    setPos({
+      x: innerRectangleRef.current?.offsetLeft || 0,
+      y: innerRectangleRef.current?.offsetTop || 0,
+    });
   };
 
   useEffect(() => {
@@ -112,20 +164,6 @@ const Container: React.FC<{ toolTipPos: string }> = ({ toolTipPos }) => {
       document.removeEventListener("mouseup", onResizeMouseUp);
     };
   }, [resizing, onResizeMouseMove, onResizeMouseUp]);
-
-  useEffect(() => {
-    const handleResize = () => {
-      if (containerRef.current) {
-        setContainerWidth(containerRef.current.offsetWidth);
-        setContainerHeight(containerRef.current.offsetHeight);
-      }
-    };
-    containerRef.current?.addEventListener("resize", handleResize);
-
-    return () => {
-      containerRef.current?.removeEventListener("resize", handleResize);
-    };
-  }, []);
 
   const onContainerMouseDown = (e: MouseEvent<HTMLDivElement>) => {
     if (e.button !== 0) return;
@@ -227,6 +265,7 @@ const Container: React.FC<{ toolTipPos: string }> = ({ toolTipPos }) => {
         <MdDragIndicator style={{ scale: "1.5", color: "orange" }} />
       </div>
       <div
+        ref={innerRectangleRef}
         onMouseDown={onMouseDown}
         onMouseEnter={onMouseEnter}
         onMouseLeave={onMouseLeave}
