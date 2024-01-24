@@ -262,7 +262,7 @@ const Container: React.FC<{ toolTipPos: string }> = ({ toolTipPos }) => {
       }}
     >
       <div onMouseDown={onContainerMouseDown} className="drag-handle">
-        <MdDragIndicator style={{ scale: "1.5", color: "orange" }} />
+        <MdDragIndicator style={{ scale: "2", color: "orange" }} />
       </div>
       <div
         ref={innerRectangleRef}

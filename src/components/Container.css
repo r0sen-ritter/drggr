@@ -77,16 +77,17 @@
   border: 1px solid transparent;
   transition: 0.1s ease-in-out;
   border-radius: 5px;
-  left: 90%;
-  top: 10%;
+  right: 20px;
+  top: 20px;
   position: absolute;
   display: flex;
   align-items: center;
   justify-content: space-evenly;
+  padding: 5px;
 }
 .drag-handle:hover {
-  border: solid 1px orangered;
-  transform: scale(1.2);
+  border: solid 1px orange;
+  transform: scale(1.1);
 }
 .item {
   height: 100px;
