@@ -47,96 +47,103 @@ const Container: React.FC<{ toolTipPos: string }> = ({ toolTipPos }) => {
 
   let totalShiftX = 0;
   let totalShiftY = 0;
+  let throttleTimeout: number | null = null;
 
   const onResizeMouseMove = (e: globalThis.MouseEvent) => {
-    if (!resizing) return;
-    let dx = e.clientX - initialMousePos.x;
-    let dy = e.clientY - initialMousePos.y;
-    let newWidth = containerWidth;
-    let newHeight = containerHeight;
+    if (throttleTimeout) return;
 
-    if (resizeHandle.includes("left")) {
-      newWidth -= dx;
-      if (newWidth < 100) {
-        newWidth = 100;
-        dx = containerWidth - newWidth;
-      }
-      containerRef.current?.style.setProperty(
-        "left",
-        `${containerPos.x + dx}px`
-      );
-      containerRef.current?.style.setProperty("width", `${newWidth}px`);
+    throttleTimeout = setTimeout(() => {
+      throttleTimeout = null;
+      if (!resizing) return;
+      setHovering(false);
+      let dx = e.clientX - initialMousePos.x;
+      let dy = e.clientY - initialMousePos.y;
+      let newWidth = containerWidth;
+      let newHeight = containerHeight;
 
-      let newPos = pos.x - dx - totalShiftX;
-      if (newPos < 0) {
-        totalShiftX += newPos;
-        newPos = 0;
-      }
-
-      innerRectangleRef.current?.style.setProperty("left", `${newPos}px`);
-    }
-
-    if (resizeHandle.includes("right")) {
-      newWidth += dx;
-      if (newWidth < 100) {
-        newWidth = 100;
-        dx = containerWidth - newWidth;
-      }
-      containerRef.current?.style.setProperty("width", `${newWidth}px`);
-
-      const innerItemPos = innerRectangleRef.current?.offsetLeft || 0;
-      const innerItemWidth = innerRectangleRef.current?.offsetWidth || 0;
-
-      if (newWidth < innerItemPos + innerItemWidth) {
-        innerRectangleRef.current?.style.setProperty(
+      if (resizeHandle.includes("left")) {
+        newWidth -= dx;
+        if (newWidth < 100) {
+          newWidth = 100;
+          dx = containerWidth - newWidth;
+        }
+        containerRef.current?.style.setProperty(
           "left",
-          `${newWidth - innerItemWidth}px`
+          `${containerPos.x + dx}px`
         );
-      }
-    }
-    if (resizeHandle.includes("top")) {
-      newHeight -= dy;
-      if (newHeight < 100) {
-        newHeight = 100;
-        dy = containerHeight - newHeight;
-      }
-      containerRef.current?.style.setProperty(
-        "top",
-        `${containerPos.y + dy}px`
-      );
-      containerRef.current?.style.setProperty("height", `${newHeight}px`);
+        containerRef.current?.style.setProperty("width", `${newWidth}px`);
 
-      let newPos = pos.y - dy - totalShiftY;
-      if (newPos < 0) {
-        totalShiftY += newPos;
-        newPos = 0;
+        let newPos = pos.x - dx - totalShiftX;
+        if (newPos < 0) {
+          totalShiftX += newPos;
+          newPos = 0;
+        }
+
+        innerRectangleRef.current?.style.setProperty("left", `${newPos}px`);
       }
 
-      innerRectangleRef.current?.style.setProperty("top", `${newPos}px`);
-    }
-    if (resizeHandle.includes("bottom")) {
-      newHeight += dy;
-      if (newHeight < 100) {
-        newHeight = 100;
-        dy = containerHeight - newHeight;
+      if (resizeHandle.includes("right")) {
+        newWidth += dx;
+        if (newWidth < 100) {
+          newWidth = 100;
+          dx = containerWidth - newWidth;
+        }
+        containerRef.current?.style.setProperty("width", `${newWidth}px`);
+
+        const innerItemPos = innerRectangleRef.current?.offsetLeft || 0;
+        const innerItemWidth = innerRectangleRef.current?.offsetWidth || 0;
+
+        if (newWidth < innerItemPos + innerItemWidth) {
+          innerRectangleRef.current?.style.setProperty(
+            "left",
+            `${newWidth - innerItemWidth}px`
+          );
+        }
       }
-      containerRef.current?.style.setProperty("height", `${newHeight}px`);
-
-      const innerItemPos = innerRectangleRef.current?.offsetTop || 0;
-      const innerItemHeight = innerRectangleRef.current?.offsetHeight || 0;
-
-      if (newHeight < innerItemPos + innerItemHeight) {
-        innerRectangleRef.current?.style.setProperty(
+      if (resizeHandle.includes("top")) {
+        newHeight -= dy;
+        if (newHeight < 100) {
+          newHeight = 100;
+          dy = containerHeight - newHeight;
+        }
+        containerRef.current?.style.setProperty(
           "top",
-          `${newHeight - innerItemHeight}px`
+          `${containerPos.y + dy}px`
         );
-      }
-    }
-    containerRef.current?.style.setProperty("width", `${newWidth}px`);
-    containerRef.current?.style.setProperty("height", `${newHeight}px`);
+        containerRef.current?.style.setProperty("height", `${newHeight}px`);
 
-    e.stopPropagation();
-    e.preventDefault();
+        let newPos = pos.y - dy - totalShiftY;
+        if (newPos < 0) {
+          totalShiftY += newPos;
+          newPos = 0;
+        }
+
+        innerRectangleRef.current?.style.setProperty("top", `${newPos}px`);
+      }
+      if (resizeHandle.includes("bottom")) {
+        newHeight += dy;
+        if (newHeight < 100) {
+          newHeight = 100;
+          dy = containerHeight - newHeight;
+        }
+        containerRef.current?.style.setProperty("height", `${newHeight}px`);
+
+        const innerItemPos = innerRectangleRef.current?.offsetTop || 0;
+        const innerItemHeight = innerRectangleRef.current?.offsetHeight || 0;
+
+        if (newHeight < innerItemPos + innerItemHeight) {
+          innerRectangleRef.current?.style.setProperty(
+            "top",
+            `${newHeight - innerItemHeight}px`
+          );
+        }
+      }
+      containerRef.current?.style.setProperty("width", `${newWidth}px`);
+      containerRef.current?.style.setProperty("height", `${newHeight}px`);
+
+      e.stopPropagation();
+      e.preventDefault();
+    }, 10);
   };
 
   const onResizeMouseUp = (e: globalThis.MouseEvent) => {
