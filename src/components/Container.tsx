@@ -175,10 +175,11 @@ const Container: React.FC<{ toolTipPos: string }> = ({ toolTipPos }) => {
   const onContainerMouseDown = (e: MouseEvent<HTMLDivElement>) => {
     if (e.button !== 0) return;
     if (containerRef.current) {
-      var posX = e.clientX - containerRef.current.offsetLeft;
-      var posY = e.clientY - containerRef.current.offsetTop;
+      let posX = e.clientX - containerRef.current.offsetLeft;
+      let posY = e.clientY - containerRef.current.offsetTop;
       setContainerDragging(true);
       setContainerRel({ x: posX, y: posY });
+      document.addEventListener("mouseup", onContainerMouseUp);
     }
     e.stopPropagation();
     e.preventDefault();
@@ -194,7 +195,6 @@ const Container: React.FC<{ toolTipPos: string }> = ({ toolTipPos }) => {
     });
     e.stopPropagation();
     e.preventDefault();
-    document.addEventListener("mouseup", onContainerMouseUp);
   };
 
   const onContainerMouseUp = (e: globalThis.MouseEvent) => {
